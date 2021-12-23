@@ -30,8 +30,6 @@ func setHeader(k, v string) reqOpt {
 	}
 }
 
-func (client *Client) NextPage(paging Paging)
-
 func (client *Client) requestAndDecode(method, u string, body io.Reader, out interface{}, opts ...reqOpt) error {
 	resp, err := client.request(method, u, body, opts...)
 	if err != nil {

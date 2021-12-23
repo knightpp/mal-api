@@ -38,7 +38,7 @@ func (client *Client) requestAndDecode(method, u string, body io.Reader, out int
 
 	defer resp.Body.Close()
 
-	return client.decode(resp, out)
+	return decode(resp, out)
 }
 
 func (client *Client) request(method, u string, body io.Reader, opts ...reqOpt) (*http.Response, error) {
@@ -78,10 +78,10 @@ func (client *Client) doDelete(u string) error {
 		return err
 	}
 
-	return client.decode(resp, nil)
+	return decode(resp, nil)
 }
 
-func (client *Client) decode(resp *http.Response, out interface{}) error {
+func decode(resp *http.Response, out interface{}) error {
 	///// TODO: DEBUGGING
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

@@ -1,7 +1,6 @@
 package mal
 
 import (
-	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -16,10 +15,11 @@ const baseURL = "https://api.myanimelist.net/v2"
 
 type Client struct {
 	token *oauth2.Token
+	debug bool
 }
 
 func NewClient(token *oauth2.Token) (*Client, error) {
-	return &Client{token}, nil
+	return &Client{token, false}, nil
 }
 
 type reqOpt func(req *http.Request)
@@ -30,6 +30,10 @@ func setHeader(k, v string) reqOpt {
 	}
 }
 
+func (client *Client) SetDebug(b bool) {
+	client.debug = b
+}
+
 func (client *Client) requestAndDecode(method, u string, body io.Reader, out interface{}, opts ...reqOpt) error {
 	resp, err := client.request(method, u, body, opts...)
 	if err != nil {
@@ -38,7 +42,7 @@ func (client *Client) requestAndDecode(method, u string, body io.Reader, out int
 
 	defer resp.Body.Close()
 
-	return decode(resp, out)
+	return client.decode(resp, out)
 }
 
 func (client *Client) request(method, u string, body io.Reader, opts ...reqOpt) (*http.Response, error) {
@@ -78,28 +82,32 @@ func (client *Client) doDelete(u string) error {
 		return err
 	}
 
-	return decode(resp, nil)
+	return client.decode(resp, nil)
 }
 
-func decode(resp *http.Response, out interface{}) error {
-	///// TODO: DEBUGGING
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
+func (client *Client) decode(resp *http.Response, out interface{}) error {
+	var body io.Reader = resp.Body
 
-	path := strings.ReplaceAll(resp.Request.URL.Path, "/", "_") + ".json"
-	log.Debug("request dump", zap.String("path", path))
-	err = os.WriteFile(path, body, 0666)
-	if err != nil {
-		log.Error("write dump failed", zap.Error(err))
-		return err
+	if client.debug {
+		bodyClone, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		path := strings.ReplaceAll(resp.Request.URL.Path, "/", "_") + ".json"
+		log.Debug("request dump", zap.String("path", path))
+		err = os.WriteFile(path, bodyClone, 0666)
+		if err != nil {
+			log.Error("write dump failed", zap.Error(err))
+			return err
+		}
+
+		body = strings.NewReader(string(bodyClone))
 	}
-	////
 
 	if resp.StatusCode != 200 {
 		var apiErr ApiError
-		err = json.NewDecoder(bytes.NewReader(body)).Decode(&apiErr)
+		err := json.NewDecoder(body).Decode(&apiErr)
 		if err != nil {
 			return err
 		}
@@ -110,8 +118,7 @@ func decode(resp *http.Response, out interface{}) error {
 		return nil
 	}
 
-	err = json.NewDecoder(bytes.NewReader(body)).Decode(out)
-	// err = json.NewDecoder(resp.Body).Decode(out)
+	err := json.NewDecoder(body).Decode(out)
 	if err != nil {
 		return err
 	}

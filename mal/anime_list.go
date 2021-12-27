@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (client *Client) SearchAnime(q string, opts ...OptFn) (*AnimeSearchListPage, error) {
+func (client *Client) SearchAnime(q string, opts ...OptFn) (*AnimeSearchPage, error) {
 	log.Debug("SearchAnime()", zap.String("query", q))
 	if q == "" {
 		return nil, fmt.Errorf("query string is empty")
@@ -22,7 +22,7 @@ func (client *Client) SearchAnime(q string, opts ...OptFn) (*AnimeSearchListPage
 
 	u := baseURL + "/anime?" + values.Encode()
 
-	var page AnimeSearchListPage
+	var page AnimeSearchPage
 	err := client.doGet(u, &page)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (client *Client) GetAnimeDetails(animeID int, opts ...OptFn) (*Anime, error
 	return &anime, nil
 }
 
-func (client *Client) GetAnimeRanking(ranking RankingType, opts ...OptFn) (*AnimeRankingListPage, error) {
+func (client *Client) GetAnimeRanking(ranking RankingType, opts ...OptFn) (*AnimeRankingPage, error) {
 	log.Debug("GetAnimeRanking()", zap.String("ranking", string(ranking)))
 	if ranking == "" {
 		return nil, fmt.Errorf("ranking is empty")
@@ -76,7 +76,7 @@ func (client *Client) GetAnimeRanking(ranking RankingType, opts ...OptFn) (*Anim
 
 	u := baseURL + "/anime/ranking?" + values.Encode()
 
-	var rankList AnimeRankingListPage
+	var rankList AnimeRankingPage
 	err := client.doGet(u, &rankList)
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func (client *Client) GetSeasonalAnime(
 	year int,
 	season Season,
 	opts ...OptFn,
-) (*SeasonalAnimeListPage, error) {
+) (*SeasonalAnimePage, error) {
 	values := make(url.Values)
 	for _, opt := range opts {
 		opt(values)
@@ -101,7 +101,7 @@ func (client *Client) GetSeasonalAnime(
 		u += "?" + valuesStr
 	}
 
-	var list SeasonalAnimeListPage
+	var list SeasonalAnimePage
 	err := client.doGet(u, &list)
 	if err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ func (client *Client) GetSeasonalAnime(
 	return &list, nil
 }
 
-func (client *Client) GetSuggestedAnime(opts ...OptFn) (*SuggestedAnimeListPage, error) {
+func (client *Client) GetSuggestedAnime(opts ...OptFn) (*SuggestedAnimePage, error) {
 	values := make(url.Values)
 	for _, opt := range opts {
 		opt(values)
@@ -122,7 +122,7 @@ func (client *Client) GetSuggestedAnime(opts ...OptFn) (*SuggestedAnimeListPage,
 		u += "?" + valuesStr
 	}
 
-	var list SuggestedAnimeListPage
+	var list SuggestedAnimePage
 	err := client.doGet(u, &list)
 	if err != nil {
 		return nil, err

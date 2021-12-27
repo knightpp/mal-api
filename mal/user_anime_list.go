@@ -9,11 +9,11 @@ import (
 	"go.uber.org/zap"
 )
 
-func (client *Client) GetMyAnimeList(opts AnimeListOptions, commonOpts ...OptFn) (*UserAnimeListPage, error) {
+func (client *Client) GetMyAnimeList(opts AnimeListOptions, commonOpts ...OptFn) (*UserAnimePage, error) {
 	return client.GetUserAnimeList("@me", opts, commonOpts...)
 }
 
-func (client *Client) GetUserAnimeList(user string, opts AnimeListOptions, commonOpts ...OptFn) (*UserAnimeListPage, error) {
+func (client *Client) GetUserAnimeList(user string, opts AnimeListOptions, commonOpts ...OptFn) (*UserAnimePage, error) {
 	log := log.Named("AnimeList()")
 	log.Debug("call",
 		zap.String("user", user),
@@ -31,7 +31,7 @@ func (client *Client) GetUserAnimeList(user string, opts AnimeListOptions, commo
 
 	u := baseURL + "/users/" + user + "/animelist?" + vals.Encode()
 
-	var page UserAnimeListPage
+	var page UserAnimePage
 	err := client.doGet(u, &page)
 	if err != nil {
 		return nil, err

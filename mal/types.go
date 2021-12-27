@@ -1,55 +1,150 @@
 package mal
 
-import "net/url"
+import (
+	"fmt"
+	"net/url"
+)
 
-type SuggestedAnimeListPage struct {
-	Data   []SuggestedAnimeList `json:"data,omitempty"`
-	Paging Paging               `json:"paging,omitempty"`
+type SuggestedAnimePage struct {
+	Data   []SuggestedAnime `json:"data,omitempty"`
+	Paging Paging           `json:"paging,omitempty"`
 }
-type SuggestedAnimeList struct {
+type SuggestedAnime struct {
 	Node Anime `json:"node,omitempty"`
 }
 
-type SeasonalAnimeListPage struct {
-	Data   []AnimeSearchList `json:"data,omitempty"`
-	Paging Paging            `json:"paging,omitempty"`
-	Season Season            `json:"season,omitempty"`
+func (suggested *SuggestedAnimePage) NextPage(client *Client) (*SuggestedAnimePage, error) {
+	if !suggested.Paging.HasNext() {
+		return nil, fmt.Errorf("there's no next page")
+	}
+	var nextPage SuggestedAnimePage
+	err := client.doGet(suggested.Paging.Next, &nextPage)
+	return &nextPage, err
 }
-type SeasonalAnimeList struct {
+func (suggested *SuggestedAnimePage) PrevPage(client *Client) (*SuggestedAnimePage, error) {
+	if !suggested.Paging.HasPrev() {
+		return nil, fmt.Errorf("there's no previous page")
+	}
+	var nextPage SuggestedAnimePage
+	err := client.doGet(suggested.Paging.Next, &nextPage)
+	return &nextPage, err
+}
+
+type SeasonalAnimePage struct {
+	Data   []AnimeSearch `json:"data,omitempty"`
+	Paging Paging        `json:"paging,omitempty"`
+	Season Season        `json:"season,omitempty"`
+}
+type SeasonalAnime struct {
 	Node Anime `json:"node,omitempty"`
 }
 
-type AnimeSearchListPage struct {
-	Data   []AnimeSearchList `json:"data,omitempty"`
-	Paging Paging            `json:"paging,omitempty"`
+func (seasonal *SeasonalAnimePage) NextPage(client *Client) (*SeasonalAnimePage, error) {
+	if !seasonal.Paging.HasNext() {
+		return nil, fmt.Errorf("there's no next page")
+	}
+	var nextPage SeasonalAnimePage
+	err := client.doGet(seasonal.Paging.Next, &nextPage)
+	return &nextPage, err
 }
-type AnimeSearchList struct {
+func (seasonal *SeasonalAnimePage) PrevPage(client *Client) (*SeasonalAnimePage, error) {
+	if !seasonal.Paging.HasPrev() {
+		return nil, fmt.Errorf("there's no previous page")
+	}
+	var nextPage SeasonalAnimePage
+	err := client.doGet(seasonal.Paging.Next, &nextPage)
+	return &nextPage, err
+}
+
+type AnimeSearchPage struct {
+	Data   []AnimeSearch `json:"data,omitempty"`
+	Paging Paging        `json:"paging,omitempty"`
+}
+type AnimeSearch struct {
 	Node Anime `json:"node,omitempty"`
 }
 
-type UserAnimeListPage struct {
-	Data   []UserAnimeList `json:"data,omitempty"`
-	Paging Paging          `json:"paging,omitempty"`
+func (search *AnimeSearchPage) NextPage(client *Client) (*AnimeSearchPage, error) {
+	if !search.Paging.HasNext() {
+		return nil, fmt.Errorf("there's no next page")
+	}
+	var nextPage AnimeSearchPage
+	err := client.doGet(search.Paging.Next, &nextPage)
+	return &nextPage, err
 }
-type UserAnimeList struct {
+func (search *AnimeSearchPage) PrevPage(client *Client) (*AnimeSearchPage, error) {
+	if !search.Paging.HasPrev() {
+		return nil, fmt.Errorf("there's no previous page")
+	}
+	var nextPage AnimeSearchPage
+	err := client.doGet(search.Paging.Next, &nextPage)
+	return &nextPage, err
+}
+
+type UserAnimePage struct {
+	Data   []UserAnime `json:"data,omitempty"`
+	Paging Paging      `json:"paging,omitempty"`
+}
+type UserAnime struct {
 	Node       Anime        `json:"node,omitempty"`
 	ListStatus MyListStatus `json:"list_status,omitempty"`
 }
 
-type AnimeRankingListPage struct {
-	Data   []AnimeRankingList `json:"data,omitempty"`
-	Paging Paging             `json:"paging,omitempty"`
+func (userAnime *UserAnimePage) NextPage(client *Client) (*UserAnimePage, error) {
+	if !userAnime.Paging.HasNext() {
+		return nil, fmt.Errorf("there's no next page")
+	}
+	var nextPage UserAnimePage
+	err := client.doGet(userAnime.Paging.Next, &nextPage)
+	return &nextPage, err
 }
-type AnimeRankingList struct {
+func (userAnime *UserAnimePage) PrevPage(client *Client) (*UserAnimePage, error) {
+	if !userAnime.Paging.HasPrev() {
+		return nil, fmt.Errorf("there's no previous page")
+	}
+	var nextPage UserAnimePage
+	err := client.doGet(userAnime.Paging.Next, &nextPage)
+	return &nextPage, err
+}
+
+type AnimeRankingPage struct {
+	Data   []AnimeRanking `json:"data,omitempty"`
+	Paging Paging         `json:"paging,omitempty"`
+}
+type AnimeRanking struct {
 	Node    Anime `json:"node,omitempty"`
 	Ranking struct {
 		Rank int `json:"rank,omitempty"`
 	} `json:"ranking,omitempty"`
 }
 
+func (ranking *AnimeRankingPage) NextPage(client *Client) (*AnimeRankingPage, error) {
+	if !ranking.Paging.HasNext() {
+		return nil, fmt.Errorf("there's no next page")
+	}
+	var nextPage AnimeRankingPage
+	err := client.doGet(ranking.Paging.Next, &nextPage)
+	return &nextPage, err
+}
+func (ranking *AnimeRankingPage) PrevPage(client *Client) (*AnimeRankingPage, error) {
+	if !ranking.Paging.HasPrev() {
+		return nil, fmt.Errorf("there's no previous page")
+	}
+	var nextPage AnimeRankingPage
+	err := client.doGet(ranking.Paging.Next, &nextPage)
+	return &nextPage, err
+}
+
 type Paging struct {
 	Previous string `json:"previous,omitempty"`
 	Next     string `json:"next,omitempty"`
+}
+
+func (p Paging) HasNext() bool {
+	return p.Next != ""
+}
+func (p Paging) HasPrev() bool {
+	return p.Previous != ""
 }
 
 type Anime struct {
